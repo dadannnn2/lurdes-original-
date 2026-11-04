@@ -1,22 +1,18 @@
-// Script de liberação do botão PIX travado
-document.addEventListener("DOMContentLoaded", function() {
-    const botaoGerar = document.querySelector("#btn-gerar-pix, .btn-gerar, button.gerar-pix, .modal button");
-    
-    // Intercepta cliques em botões de carregamento para evitar o travamento eterno
-    document.querySelectorAll("button").forEach(btn => {
-        if (btn.innerText.includes("Gerando") || btn.innerText.includes("PIX")) {
-            btn.addEventListener("click", function() {
-                setTimeout(() => {
-                    if (btn.innerText.includes("Gerando")) {
-                        btn.innerText = "A Gerar Pix...";
-                        // Libera o botão após 3 segundos se a API falhar, evitando o travamento da imagem
-                        setTimeout(() => {
-                            btn.disabled = false;
-                            btn.innerText = "Gerar PIX";
-                        }, 3000);
-                    }
-                }, 1000);
+// Script para destravar o botão de PIX caso o servidor falhe
+document.addEventListener('click', function (evento) {
+    const alvo = evento.target;
+    if (alvo && (alvo.innerText.includes('Continuar') || alvo.innerText.includes('Contribuir') || alvo.innerText.includes('Gerar') || alvo.tagName === 'BUTTON')) {
+        setTimeout(() => {
+            const botoes = document.querySelectorAll('button');
+            botoes.forEach(btn => {
+                if (btn.innerText.includes('Gerando') || btn.innerText.includes('A gerarn')) {
+                    setTimeout(() => {
+                        btn.innerText = 'Erro ao conectar com o pagamento';
+                        btn.disabled = false;
+                        alert('O sistema de pagamento está temporariamente indisponível. Verifique se o servidor de retaguarda está ativo.');
+                    }, 3000);
+                }
             });
-        }
-    });
+        }, 500);
+    }
 });
