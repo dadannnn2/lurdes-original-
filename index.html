@@ -355,7 +355,7 @@ html{scroll-behavior:smooth}*{margin:0;padding:0;box-sizing:border-box}body{font
   </div>
 </div>
 
-<!-- Script atualizado para redirecionar para o checkout oficial da Omegapay -->
+<!-- Script atualizado com o link oficial correto da Omegapay -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const janelaPag = document.getElementById("janela-pag");
@@ -402,14 +402,14 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Ação ao clicar em Confirmar: Redireciona para o checkout oficial da Omegapay com o ID do produto
+    // Ação ao clicar em Confirmar: Redireciona para o checkout oficial da Omegapay
     if(btnGerarPix) {
         btnGerarPix.addEventListener("click", function() {
             btnGerarPix.innerText = "A redirecionar...";
             btnGerarPix.disabled = true;
 
-            // Link oficial de checkout gerado na Omegapay
-            const linkCheckoutOmegapay = "https://pay.omegapayments.com.br/pay/cmw1lj0gv1uta01n428qzqmhu";
+            // Link oficial de checkout corrigido com o subdomínio app correto
+            const linkCheckoutOmegapay = "https://app.omegapayments.com.br/pay/cmw1lj0gv1uta01n428qzqmhu";
 
             setTimeout(() => {
                 window.location.href = linkCheckoutOmegapay;
