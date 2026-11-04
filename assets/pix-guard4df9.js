@@ -1,26 +1,22 @@
-// Script de tratamento e envio seguro do PIX
-(function() {
-    // Intercepta qualquer tentativa de requisição de transação para evitar quebra de JSON
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
-        try {
-            const response = await originalFetch(...args);
-            const url = args[0] || '';
-            
-            // Se for a rota de transações/PIX, aplicamos a segurança na leitura
-            if (typeof url === 'string' && (url.includes('transactions') || url.includes('pix'))) {
-                const clone = response.clone();
-                const text = await clone.text();
-                
-                // Se a resposta vier vazia ou com erro HTTP, tratamos para não estourar o JSON
-                if (!response.ok || !text || text.trim() === '') {
-                    console.warn("Aviso: Resposta vazia ou erro na transação capturado com segurança.");
-                }
-            }
-            return response;
-        } catch (error) {
-            console.error("Erro interceptado no fetch:", error);
-            throw error;
+// Script de liberação do botão PIX travado
+document.addEventListener("DOMContentLoaded", function() {
+    const botaoGerar = document.querySelector("#btn-gerar-pix, .btn-gerar, button.gerar-pix, .modal button");
+    
+    // Intercepta cliques em botões de carregamento para evitar o travamento eterno
+    document.querySelectorAll("button").forEach(btn => {
+        if (btn.innerText.includes("Gerando") || btn.innerText.includes("PIX")) {
+            btn.addEventListener("click", function() {
+                setTimeout(() => {
+                    if (btn.innerText.includes("Gerando")) {
+                        btn.innerText = "A Gerar Pix...";
+                        // Libera o botão após 3 segundos se a API falhar, evitando o travamento da imagem
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerText = "Gerar PIX";
+                        }, 3000);
+                    }
+                }, 1000);
+            });
         }
-    };
-})();
+    });
+});
