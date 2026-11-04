@@ -342,17 +342,7 @@ html{scroll-behavior:smooth}*{margin:0;padding:0;box-sizing:border-box}body{font
             <small>Adicionar R$ 4,99 para cobrir as taxas.</small>
           </span>
         </label>
-        <button id="btn-gerar-pix" type="button">Confirmar e gerar Pix</button>
-      </div>
-      <div id="passo-pix" style="display:none">
-        <div class="bloco-codigo">
-          <textarea id="texto-copiavel" readonly placeholder="Gerando código Pix..."></textarea>
-        </div>
-        <button id="btn-copiar-chave">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copiar código PIX
-        </button>
-        <p id="status-pix" class="status-pix"></p>
+        <button id="btn-gerar-pix" type="button">Confirmar e pagar com Pix</button>
       </div>
     </div>
     <div class="rodape-modal">
@@ -365,7 +355,7 @@ html{scroll-behavior:smooth}*{margin:0;padding:0;box-sizing:border-box}body{font
   </div>
 </div>
 
-<!-- Script otimizado com payload Pix EMV estruturado e válido aceito pelos bancos -->
+<!-- Script atualizado para redirecionar para o checkout oficial da Omegapay -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const janelaPag = document.getElementById("janela-pag");
@@ -373,10 +363,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const exibeQuantia = document.getElementById("exibe-quantia");
     const btnGerarPix = document.getElementById("btn-gerar-pix");
     const passoRevisao = document.getElementById("passo-revisao");
-    const passoPix = document.getElementById("passo-pix");
-    const textoCopiavel = document.getElementById("texto-copiavel");
-    const btnCopiarChave = document.getElementById("btn-copiar-chave");
-    const statusPix = document.getElementById("status-pix");
 
     let valorAtualCentavos = 3000; // Padrão R$ 30
 
@@ -404,7 +390,6 @@ document.addEventListener("DOMContentLoaded", function() {
             // Abre o modal limpo na tela
             if(janelaPag) {
                 passoRevisao.style.display = "block";
-                passoPix.style.display = "none";
                 janelaPag.classList.add("mostrar-agora");
             }
         });
@@ -417,37 +402,18 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Ação de Gerar o Pix com payload EMV verificado e válido
+    // Ação ao clicar em Confirmar: Redireciona para o checkout oficial da Omegapay com o ID do produto
     if(btnGerarPix) {
         btnGerarPix.addEventListener("click", function() {
-            btnGerarPix.innerText = "Gerando Pix...";
+            btnGerarPix.innerText = "A redirecionar...";
             btnGerarPix.disabled = true;
 
+            // Link oficial de checkout gerado na Omegapay
+            const linkCheckoutOmegapay = "https://pay.omegapayments.com.br/pay/cmw1lj0gv1uta01n428qzqmhu";
+
             setTimeout(() => {
-                btnGerarPix.innerText = "Confirmar e gerar Pix";
-                btnGerarPix.disabled = false;
-
-                passoRevisao.style.display = "none";
-                passoPix.style.display = "block";
-
-                // Payload Pix padrão oficial com checksum correto aceito pelos bancos
-                let payloadValido = "00020126580014br.gov.bcb.pix0136danilolintz1-h433-4jjz-cd0l-6swefne4xv7e0214DOACAO IRMA LURDES520400005303986540530.005802BR5925ASSOCIACAO IRMA LURDES6009SAO PAULO62070503***6304E2B1";
-                
-                textoCopiavel.value = payloadValido;
-                statusPix.innerText = "PIX gerado com sucesso!";
-            }, 600);
-        });
-    }
-
-    // Copiar chave Pix ao clicar no botão
-    if(btnCopiarChave) {
-        btnCopiarChave.addEventListener("click", function() {
-            textoCopiavel.select();
-            document.execCommand('copy');
-            btnCopiarChave.innerText = "Código copiado!";
-            setTimeout(() => {
-                btnCopiarChave.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código PIX`;
-            }, 2500);
+                window.location.href = linkCheckoutOmegapay;
+            }, 500);
         });
     }
 });
