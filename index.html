@@ -342,7 +342,22 @@ html{scroll-behavior:smooth}*{margin:0;padding:0;box-sizing:border-box}body{font
             <small>Adicionar R$ 4,99 para cobrir as taxas.</small>
           </span>
         </label>
-        <button id="btn-gerar-pix" type="button">Confirmar e pagar com Pix</button>
+        <button id="btn-gerar-pix" type="button">Confirmar e gerar Pix</button>
+      </div>
+      <div id="passo-pix" style="display:none">
+        <div id="area-qrcode">
+          <img id="qr-code-img" src="" alt="QR Code Pix" style="width:100%;height:100%;display:none;">
+        </div>
+        <p class="instrucoes-texto">Abra o app do seu banco, escolha PIX Copia e Cola ou aponte a câmera para o QR Code.</p>
+        <div class="separador-opcoes">ou copie e cole</div>
+        <div class="bloco-codigo">
+          <textarea id="texto-copiavel" readonly placeholder="Gerando código Pix..."></textarea>
+        </div>
+        <button id="btn-copiar-chave">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copiar código PIX
+        </button>
+        <p id="status-pix" class="status-pix"></p>
       </div>
     </div>
     <div class="rodape-modal">
@@ -355,7 +370,7 @@ html{scroll-behavior:smooth}*{margin:0;padding:0;box-sizing:border-box}body{font
   </div>
 </div>
 
-<!-- Script otimizado para redirecionar de forma limpa e imediata para o checkout válido da Omegapay -->
+<!-- Script atualizado para lidar com a API da Omegapay diretamente no modal da página -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const janelaPag = document.getElementById("janela-pag");
@@ -363,6 +378,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const exibeQuantia = document.getElementById("exibe-quantia");
     const btnGerarPix = document.getElementById("btn-gerar-pix");
     const passoRevisao = document.getElementById("passo-revisao");
+    const passoPix = document.getElementById("passo-pix");
+    const textoCopiavel = document.getElementById("texto-copiavel");
+    const qrCodeImg = document.getElementById("qr-code-img");
+    const btnCopiarChave = document.getElementById("btn-copiar-chave");
+    const statusPix = document.getElementById("status-pix");
 
     let valorAtualCentavos = 3000; // Padrão R$ 30
 
@@ -390,6 +410,7 @@ document.addEventListener("DOMContentLoaded", function() {
             // Abre o modal limpo na tela
             if(janelaPag) {
                 passoRevisao.style.display = "block";
+                passoPix.style.display = "none";
                 janelaPag.classList.add("mostrar-agora");
             }
         });
@@ -402,16 +423,68 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Ação ao clicar em Confirmar: Redireciona para o checkout oficial da Omegapay gerando o Pix real garantido
+    // Ação de Gerar o Pix real via Omegapay dentro do modal
     if(btnGerarPix) {
         btnGerarPix.addEventListener("click", function() {
-            btnGerarPix.innerText = "A redirecionar para o pagamento...";
+            btnGerarPix.innerText = "Gerando Pix...";
             btnGerarPix.disabled = true;
 
-            // Redirecionamento seguro para o painel de checkout da Omegapay
+            const clientId = "danilolintz1_h433cjjzcd0l6swe";
+            const clientSecret = "fne4xv7eqge2wdsatljmrtpe1hq86xoxg4hnffnwser1c3y1lbfrv2ilr85025jn";
+
+            fetch('https://api.omegapay.com/v1/transactions', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Client-Id': clientId,
+                    'X-Client-Secret': clientSecret
+                },
+                body: JSON.stringify({
+                    amount: valorAtualCentavos,
+                    payment_method: 'pix',
+                    description: 'Doação - Irmã Lurdes'
+                })
+            })
+            .then(async response => {
+                const text = await response.text();
+                if (!text) throw new Error("Resposta vazia.");
+                return JSON.parse(text);
+            })
+            .then(data => {
+                btnGerarPix.innerText = "Confirmar e gerar Pix";
+                btnGerarPix.disabled = false;
+
+                passoRevisao.style.display = "none";
+                passoPix.style.display = "block";
+
+                // Puxa o código Pix Copia e Cola exato da Omegapay
+                let codigoPix = data.pix_emv || data.pix_copy_paste || data.qr_code || "";
+                textoCopiavel.value = codigoPix;
+                statusPix.innerText = "PIX gerado com sucesso!";
+
+                if (data.qr_code_base64) {
+                    qrCodeImg.src = "data:image/png;base64," + data.qr_code_base64;
+                    qrCodeImg.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error("Erro:", error);
+                btnGerarPix.innerText = "Confirmar e gerar Pix";
+                btnGerarPix.disabled = false;
+                alert("Erro ao conectar com a gateway. Tente novamente.");
+            });
+        });
+    }
+
+    // Copiar chave Pix ao clicar no botão
+    if(btnCopiarChave) {
+        btnCopiarChave.addEventListener("click", function() {
+            textoCopiavel.select();
+            document.execCommand('copy');
+            btnCopiarChave.innerText = "Código copiado!";
             setTimeout(() => {
-                window.location.href = "https://app.omegapay.com/";
-            }, 800);
+                btnCopiarChave.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código PIX`;
+            }, 2500);
         });
     }
 });
